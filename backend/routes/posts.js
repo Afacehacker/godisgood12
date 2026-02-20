@@ -1,0 +1,118 @@
+const express = require('express');
+const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
+const { protect } = require('../utils/auth');
+
+const prisma = new PrismaClient();
+
+// Get all posts
+router.get('/', async (req, res) => {
+    try {
+        const posts = await prisma.post.findMany({
+            include: {
+                author: { select: { id: true, name: true } },
+                likes: true,
+                comments: {
+                    include: { user: { select: { id: true, name: true } } },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        res.json(posts);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Create post
+router.post('/', protect, async (req, res) => {
+    const { content } = req.body;
+
+    try {
+        const post = await prisma.post.create({
+            data: {
+                content,
+                authorId: req.userId,
+            },
+            include: {
+                author: { select: { id: true, name: true } },
+            },
+        });
+        res.status(201).json(post);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Like/Unlike post
+router.post('/:id/like', protect, async (req, res) => {
+    const postId = parseInt(req.params.id);
+    const userId = req.userId;
+
+    try {
+        const existingLike = await prisma.like.findUnique({
+            where: { userId_postId: { userId, postId } },
+        });
+
+        if (existingLike) {
+            await prisma.like.delete({
+                where: { id: existingLike.id },
+            });
+            res.json({ liked: false });
+        } else {
+            await prisma.like.create({
+                data: { userId, postId },
+            });
+            res.json({ liked: true });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Comment on post
+router.post('/:id/comment', protect, async (req, res) => {
+    const postId = parseInt(req.params.id);
+    const userId = req.userId;
+    const { content } = req.body;
+
+    try {
+        const comment = await prisma.comment.create({
+            data: {
+                content,
+                userId,
+                postId,
+            },
+            include: {
+                user: { select: { id: true, name: true } },
+            },
+        });
+        res.status(201).json(comment);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Delete post
+router.delete('/:id', protect, async (req, res) => {
+    const postId = parseInt(req.params.id);
+
+    try {
+        const post = await prisma.post.findUnique({ where: { id: postId } });
+
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        if (post.authorId !== req.userId) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        await prisma.post.delete({ where: { id: postId } });
+        res.json({ message: 'Post removed' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+module.exports = router;
