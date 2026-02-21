@@ -32,6 +32,15 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
+// Catch-all for API 404s
+app.use('/api/*', (req, res) => {
+    console.log(`404 at ${req.originalUrl}`);
+    res.status(404).json({
+        message: `API Route ${req.originalUrl} not found`,
+        path: req.originalUrl
+    });
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error('SERVER ERROR:', err);
