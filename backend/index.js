@@ -1,11 +1,21 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
+const dotenv = require('dotenv');
+const { PrismaClient } = require('@prisma/client');
 
 dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
+const PORT = process.env.PORT || 5000;
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+}
 
 // Middleware
 app.use(cors({
@@ -13,7 +23,7 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 // Request Logger
 app.use((req, res, next) => {
