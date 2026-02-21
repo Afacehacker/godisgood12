@@ -10,10 +10,10 @@ router.get('/', async (req, res) => {
     try {
         const posts = await prisma.post.findMany({
             include: {
-                author: { select: { id: true, name: true } },
+                author: { select: { id: true, name: true, avatar: true } },
                 likes: true,
                 comments: {
-                    include: { user: { select: { id: true, name: true } } },
+                    include: { user: { select: { id: true, name: true, avatar: true } } },
                 },
             },
             orderBy: { createdAt: 'desc' },
@@ -35,7 +35,7 @@ router.post('/', protect, async (req, res) => {
                 authorId: req.userId,
             },
             include: {
-                author: { select: { id: true, name: true } },
+                author: { select: { id: true, name: true, avatar: true } },
             },
         });
         res.status(201).json(post);
@@ -84,7 +84,7 @@ router.post('/:id/comment', protect, async (req, res) => {
                 postId,
             },
             include: {
-                user: { select: { id: true, name: true } },
+                user: { select: { id: true, name: true, avatar: true } },
             },
         });
         res.status(201).json(comment);

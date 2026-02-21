@@ -1,24 +1,25 @@
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
-const { PrismaClient } = require('@prisma/client');
+const path = require('path');
 
 dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
 
-// Connect to Database
-prisma.$connect()
-    .then(() => console.log('Connected to MongoDB via Prisma'))
-    .catch((err) => console.error('Prisma connection error:', err));
-const PORT = process.env.PORT || 5000;
-
+// Middleware
 app.use(cors({
     origin: ['https://godisgood-lilac.vercel.app', 'http://localhost:5173'],
     credentials: true
 }));
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Request Logger
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/posts', require('./routes/posts'));
@@ -32,8 +33,8 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
-// Catch-all for API 404s
-app.use('/api/*', (req, res) => {
+// Catch-all for API 404s (Express 5 syntax)
+app.use('/api/:path*', (req, res) => {
     console.log(`404 at ${req.originalUrl}`);
     res.status(404).json({
         message: `API Route ${req.originalUrl} not found`,
