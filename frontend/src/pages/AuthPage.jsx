@@ -21,7 +21,9 @@ const AuthPage = ({ type }) => {
             }
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || 'Something went wrong');
+            const errorMsg = err.response?.data?.detail || err.response?.data?.message || err.message || 'Network Error';
+            setError(`${errorMsg} (Check: ${import.meta.env.VITE_API_BASE_URL || 'https://godisgood-backend.onrender.com/api'})`);
+            console.error('Auth Error:', err);
         }
     };
 
