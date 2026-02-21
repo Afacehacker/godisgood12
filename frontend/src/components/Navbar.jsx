@@ -23,6 +23,12 @@ const Navbar = () => {
         }
     };
 
+    const getAvatarUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `${api.defaults.baseURL.replace('/api', '')}${path}`;
+    };
+
     return (
         <nav className="glass-nav" style={{
             position: 'sticky',
@@ -94,8 +100,20 @@ const Navbar = () => {
                                                 }}
                                                 className="search-result-item"
                                             >
-                                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>
-                                                    {result.name[0]}
+                                                <div style={{
+                                                    width: '24px',
+                                                    height: '24px',
+                                                    borderRadius: '50%',
+                                                    background: 'var(--primary)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '0.75rem',
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    {result.avatar ? (
+                                                        <img src={getAvatarUrl(result.avatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ) : result.name[0]}
                                                 </div>
                                                 <span>{result.name}</span>
                                             </Link>
@@ -127,9 +145,12 @@ const Navbar = () => {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontWeight: 'bold',
-                                color: 'white'
+                                color: 'white',
+                                overflow: 'hidden'
                             }}>
-                                {user.name.charAt(0).toUpperCase()}
+                                {user.avatar ? (
+                                    <img src={getAvatarUrl(user.avatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : user.name.charAt(0).toUpperCase()}
                             </Link>
                         </>
                     ) : (

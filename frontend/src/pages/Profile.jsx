@@ -14,6 +14,8 @@ const Profile = () => {
     const [error, setError] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({ name: '', bio: '', avatar: '' });
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState('');
 
     const userId = id || (currentUser ? currentUser.id : null);
 
@@ -23,6 +25,12 @@ const Profile = () => {
                 const res = await api.get(`/users/${userId}`);
                 setUser(res.data);
                 setFormData({ name: res.data.name, bio: res.data.bio || '', avatar: res.data.avatar || '' });
+                if (res.data.avatar) {
+                    const avatarUrl = res.data.avatar.startsWith('http')
+                        ? res.data.avatar
+                        : `${api.defaults.baseURL.replace('/api', '')}${res.data.avatar}`;
+                    setAvatarPreview(avatarUrl);
+                }
                 setLoading(false);
             } catch (err) {
                 setError('User not found');
@@ -33,16 +41,40 @@ const Profile = () => {
         if (userId) fetchUser();
     }, [userId]);
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setAvatarFile(file);
+            setAvatarPreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleUpdate = async (e) => {
         e.preventDefault();
         if (!currentUser) return;
+
+        const data = new FormData();
+        data.append('name', formData.name);
+        data.append('bio', formData.bio);
+        if (avatarFile) {
+            data.append('avatar', avatarFile);
+        }
+
         try {
-            const res = await api.put('/users/profile', formData);
+            const res = await api.put('/users/profile', data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
             setUser({ ...user, ...res.data });
             setIsEditing(false);
             addToast('Profile updated');
+
+            // Update localStorage user if it's the current user
+            if (isOwnProfile) {
+                const storedUser = JSON.parse(localStorage.getItem('user'));
+                localStorage.setItem('user', JSON.stringify({ ...storedUser, ...res.data }));
+            }
         } catch (err) {
-            setError('Update failed');
+            setError(err.response?.data?.message || 'Update failed');
         }
     };
 
@@ -50,6 +82,12 @@ const Profile = () => {
     if (error) return <div className="container error-msg">{error}</div>;
 
     const isOwnProfile = currentUser && currentUser.id === user.id;
+
+    const getAvatarUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `${api.defaults.baseURL.replace('/api', '')}${path}`;
+    };
 
     return (
         <div className="container">
@@ -64,9 +102,16 @@ const Profile = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '2rem',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        position: 'relative'
                     }}>
-                        {user.avatar ? <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : user.name[0]}
+                        {(avatarPreview || user.avatar) ? (
+                            <img
+                                src={avatarPreview || getAvatarUrl(user.avatar)}
+                                alt={user.name}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                        ) : user.name[0]}
                     </div>
                     <div style={{ flex: 1 }}>
                         <h1 style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{user.name}</h1>
@@ -80,7 +125,16 @@ const Profile = () => {
                 </div>
 
                 {isEditing ? (
-                    <form onSubmit={handleUpdate}>
+                    <form onSubmit={handleUpdate} encType="multipart/form-data">
+                        <div className="mb-4">
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Profile Picture</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                style={{ padding: '0.5rem', marginBottom: '0.5rem' }}
+                            />
+                        </div>
                         <input
                             type="text"
                             placeholder="Name"
@@ -91,12 +145,6 @@ const Profile = () => {
                             placeholder="Bio"
                             value={formData.bio}
                             onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Avatar URL"
-                            value={formData.avatar}
-                            onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
                         />
                         <button type="submit" className="btn-primary">Save Changes</button>
                     </form>

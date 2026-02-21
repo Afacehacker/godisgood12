@@ -51,6 +51,12 @@ const PostCard = ({ post, onUpdate }) => {
 
     const isLiked = post.likes.some(like => like.userId === user?.id);
 
+    const getAvatarUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `${api.defaults.baseURL.replace('/api', '')}${path}`;
+    };
+
     return (
         <div className="glass-card" style={{ marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -62,9 +68,12 @@ const PostCard = ({ post, onUpdate }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    overflow: 'hidden'
                 }}>
-                    {post.author.name.charAt(0).toUpperCase()}
+                    {post.author.avatar ? (
+                        <img src={getAvatarUrl(post.author.avatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : post.author.name.charAt(0).toUpperCase()}
                 </div>
                 <div style={{ flex: 1 }}>
                     <h4 style={{ margin: 0 }}>{post.author.name}</h4>
@@ -108,11 +117,27 @@ const PostCard = ({ post, onUpdate }) => {
                 <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
                     {post.comments.map(comment => (
                         <div key={comment.id} style={{ marginBottom: '1rem', background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '0.5rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                <div style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    background: 'var(--primary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold',
+                                    overflow: 'hidden'
+                                }}>
+                                    {comment.user.avatar ? (
+                                        <img src={getAvatarUrl(comment.user.avatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : comment.user.name.charAt(0).toUpperCase()}
+                                </div>
                                 <span style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{comment.user.name}</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>{new Date(comment.createdAt).toLocaleDateString()}</span>
                             </div>
-                            <p style={{ fontSize: '0.875rem' }}>{comment.content}</p>
+                            <p style={{ fontSize: '0.875rem', paddingLeft: '1.75rem' }}>{comment.content}</p>
                         </div>
                     ))}
 
