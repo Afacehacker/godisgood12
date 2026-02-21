@@ -31,8 +31,11 @@ app.get('/api/health', (req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Something went wrong!' });
+    console.error('SERVER ERROR:', err);
+    res.status(500).json({
+        message: 'Something went wrong!',
+        error: process.env.NODE_ENV === 'production' ? null : err.message
+    });
 });
 
 app.listen(PORT, () => {
