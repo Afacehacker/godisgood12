@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://godisgood-backend.onrender.com/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://godisgood12.onrender.com/api',
 });
 
 api.interceptors.request.use((config) => {
