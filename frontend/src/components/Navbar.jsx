@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, Home, User } from 'lucide-react';
+import api from '../services/api';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -12,8 +13,7 @@ const Navbar = () => {
         setSearchQuery(query);
         if (query.length > 2) {
             try {
-                const res = await fetch(`http://localhost:5000/api/users/search/${query}`);
-                const data = await res.json();
+                const { data } = await api.get(`/users/search/${query}`);
                 setSearchResults(data);
             } catch (err) {
                 console.error(err);

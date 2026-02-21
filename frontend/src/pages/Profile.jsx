@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import axios from 'axios';
+import api from '../services/api';
 import PostCard from '../components/PostCard';
 
 const Profile = () => {
@@ -20,7 +20,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/users/${userId}`);
+                const res = await api.get(`/users/${userId}`);
                 setUser(res.data);
                 setFormData({ name: res.data.name, bio: res.data.bio || '', avatar: res.data.avatar || '' });
                 setLoading(false);
@@ -37,9 +37,7 @@ const Profile = () => {
         e.preventDefault();
         if (!currentUser) return;
         try {
-            const res = await axios.put('http://localhost:5000/api/users/profile', formData, {
-                headers: { Authorization: `Bearer ${currentUser.token}` }
-            });
+            const res = await api.put('/users/profile', formData);
             setUser({ ...user, ...res.data });
             setIsEditing(false);
             addToast('Profile updated');
