@@ -28,9 +28,6 @@ const Navbar = () => {
             position: 'sticky',
             top: 0,
             zIndex: 100,
-            background: 'rgba(15, 23, 42, 0.8)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             padding: '1rem 0'
         }}>
             <div className="container" style={{
@@ -44,7 +41,8 @@ const Navbar = () => {
                     fontWeight: 'bold',
                     background: 'linear-gradient(to right, #6366f1, #a855f7)',
                     WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
                 }}>
                     SocialLink
                 </Link>
@@ -106,10 +104,10 @@ const Navbar = () => {
                                 )}
                             </div>
                             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
-                                <Home size={20} /> <span>Feed</span>
+                                <Home size={20} /> <span style={{ display: 'none', '@media (minWidth: 768px)': { display: 'inline' } }}>Feed</span>
                             </Link>
                             <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
-                                <User size={20} /> <span>Profile</span>
+                                <User size={20} /> <span style={{ display: 'none', '@media (minWidth: 768px)': { display: 'inline' } }}>Profile</span>
                             </Link>
                             <button onClick={logout} style={{
                                 background: 'none',
@@ -118,7 +116,7 @@ const Navbar = () => {
                                 alignItems: 'center',
                                 gap: '0.5rem'
                             }}>
-                                <LogOut size={20} /> <span>Logout</span>
+                                <LogOut size={20} /> <span style={{ display: 'none', '@media (minWidth: 768px)': { display: 'inline' } }}>Logout</span>
                             </button>
                             <Link to="/profile" style={{
                                 width: '32px',
@@ -136,8 +134,8 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
-                            <Link to="/login">Login</Link>
-                            <Link to="/signup" className="btn-primary">Sign Up</Link>
+                            <Link to="/login" className="btn-secondary" style={{ padding: '0.5rem 1.25rem' }}>Login</Link>
+                            <Link to="/signup" className="btn-primary" style={{ padding: '0.5rem 1.25rem' }}>Sign Up</Link>
                         </>
                     )}
                 </div>
