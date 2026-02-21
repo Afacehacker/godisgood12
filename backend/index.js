@@ -16,6 +16,10 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/users', require('./routes/users'));
 
+app.get('/', (req, res) => {
+    res.send('SocialLink API is running...');
+});
+
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
