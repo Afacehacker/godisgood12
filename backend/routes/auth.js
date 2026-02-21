@@ -34,7 +34,8 @@ router.post('/signup', async (req, res) => {
             token: generateToken(user.id),
         });
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error('Signup Error:', error);
+        res.status(500).json({ message: 'Server error', detail: error.message });
     }
 });
 
@@ -55,7 +56,8 @@ router.post('/login', async (req, res) => {
             res.status(401).json({ message: 'Invalid email or password' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error('Login Error:', error);
+        res.status(500).json({ message: 'Server error', detail: error.message });
     }
 });
 
