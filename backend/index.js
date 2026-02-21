@@ -7,6 +7,11 @@ dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
+
+// Connect to Database
+prisma.$connect()
+    .then(() => console.log('Connected to MongoDB via Prisma'))
+    .catch((err) => console.error('Prisma connection error:', err));
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());

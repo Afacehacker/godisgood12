@@ -46,7 +46,7 @@ router.post('/', protect, async (req, res) => {
 
 // Like/Unlike post
 router.post('/:id/like', protect, async (req, res) => {
-    const postId = parseInt(req.params.id);
+    const postId = req.params.id;
     const userId = req.userId;
 
     try {
@@ -72,7 +72,7 @@ router.post('/:id/like', protect, async (req, res) => {
 
 // Comment on post
 router.post('/:id/comment', protect, async (req, res) => {
-    const postId = parseInt(req.params.id);
+    const postId = req.params.id;
     const userId = req.userId;
     const { content } = req.body;
 
@@ -95,7 +95,7 @@ router.post('/:id/comment', protect, async (req, res) => {
 
 // Delete post
 router.delete('/:id', protect, async (req, res) => {
-    const postId = parseInt(req.params.id);
+    const postId = req.params.id;
 
     try {
         const post = await prisma.post.findUnique({ where: { id: postId } });
